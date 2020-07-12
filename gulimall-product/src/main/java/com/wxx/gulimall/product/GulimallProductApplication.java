@@ -1,6 +1,5 @@
 package com.wxx.gulimall.product;
 
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -16,9 +15,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *          1）、配置mysql驱动
  *          2）、配置数据源相关信息
  *      3）、配置Mybatis-Plus
- *          1）、配置MapperScan
+ *          1）、配置MapperScan和dao蹭接口上加@Mapper二选一
  */
-@MapperScan("com.wxx.gulimall.product.dao")
 @SpringBootApplication
 public class GulimallProductApplication {
 
