@@ -5,6 +5,13 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  application:
+    name: gulimall-member
+
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
