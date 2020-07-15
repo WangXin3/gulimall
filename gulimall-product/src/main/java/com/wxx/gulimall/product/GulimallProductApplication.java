@@ -2,6 +2,7 @@ package com.wxx.gulimall.product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * 整合mybatis-plus
@@ -18,6 +19,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *          1）、配置MapperScan和dao蹭接口上加@Mapper二选一
  */
 @SpringBootApplication
+@EnableDiscoveryClient
 public class GulimallProductApplication {
 
     public static void main(String[] args) {
