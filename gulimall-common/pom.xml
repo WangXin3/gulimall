@@ -9,6 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <java.version>1.8</java.version>
+    </properties>
+
     <artifactId>gulimall-common</artifactId>
     <description>每一个微服务公共的依赖</description>
     <dependencies>
