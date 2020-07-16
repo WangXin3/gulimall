@@ -10,13 +10,13 @@ spring:
         file-extension: yml
         extension-configs[0]:
           dataId: datasource.yml
-          group: dev
+          group: prod
           refresh: true
         extension-configs[1]:
           dataId: mybatis.yml
-          group: dev
+          group: prod
           refresh: true
         extension-configs[2]:
           dataId: other.yml
-          group: dev
+          group: prod
           refresh: true
