@@ -4,6 +4,10 @@
 #    username: root
 #    password: root
 #    driver-class-name: com.mysql.jdbc.Driver
+#    hikari:
+#      maximum-pool-size: 3
+#      minimumIdle: 1
+
 #  cloud:
 #    nacos:
 #      discovery:
@@ -21,4 +25,3 @@
 
 #server:
 #  port: 10000
-
