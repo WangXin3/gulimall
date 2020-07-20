@@ -3,15 +3,21 @@ package com.wxx.gulimall.product;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wxx.gulimall.product.entity.BrandEntity;
 import com.wxx.gulimall.product.service.BrandService;
+import com.wxx.gulimall.product.service.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Arrays;
 
 @SpringBootTest
 class GulimallProductApplicationTests {
 
     @Autowired
     BrandService brandService;
+
+    @Autowired
+    CategoryService categoryService;
 
     @Test
     void contextLoads() {
@@ -32,6 +38,12 @@ class GulimallProductApplicationTests {
         );
 
 
+    }
+
+    @Test
+    public void testFindPath() {
+        Long[] catelogPath = categoryService.findCatelogPath(225L);
+        System.out.println(Arrays.asList(catelogPath));
     }
 
 
