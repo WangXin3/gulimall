@@ -24,9 +24,15 @@ public interface CategoryService extends IService<CategoryEntity> {
 
     /**
      * 找到catelogId的完整路径
-     * @param groupId
+     * @param catelogId
      * @return
      */
     Long[] findCatelogPath(Long catelogId);
+
+    /**
+     * 级联更新所有关联的分类数据
+     * @param category
+     */
+    void updateCascade(CategoryEntity category);
 }
 
