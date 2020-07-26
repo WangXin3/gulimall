@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.wxx.gulimall.product.entity.AttrEntity;
+import com.wxx.gulimall.product.service.AttrAttrgroupRelationService;
 import com.wxx.gulimall.product.service.AttrService;
 import com.wxx.gulimall.product.service.CategoryService;
 import com.wxx.gulimall.product.vo.AttrGroupRelationVO;
+import com.wxx.gulimall.product.vo.AttrGroupWithAttrsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +39,34 @@ public class AttrGroupController {
     @Autowired
     private AttrService attrService;
 
-    // /product/attrgroup/{attrgroupId}/noattr/relation
+    @Autowired
+    private AttrAttrgroupRelationService relationService;
+
+
+    /**
+     * 获取分类下所有分组&关联属性
+     * @param catelogId
+     * @return
+     */
+    @GetMapping("/{catelogId}/withattr")
+    public R withattr(@PathVariable("catelogId") Long catelogId) {
+        // 1. 查询当前分类下的所有属性分组
+
+        // 2. 查询每个属性分组的所有属性
+
+        List<AttrGroupWithAttrsVO> vos = attrGroupService.getAttrGroupWithAttrsByCatelogId(catelogId);
+
+        return R.ok().put("data", vos);
+    }
+
+
+
+    @PostMapping("/attr/relation")
+    public R addRelation(@RequestBody List<AttrGroupRelationVO> vos) {
+        relationService.saveBatch(vos);
+
+        return R.ok();
+    }
 
     @GetMapping("/{attrgroupId}/noattr/relation")
     public R attrNoRelation(@RequestParam Map<String, Object> params,

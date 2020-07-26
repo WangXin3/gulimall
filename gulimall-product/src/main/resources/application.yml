@@ -7,14 +7,16 @@
 #    hikari:
 #      maximum-pool-size: 3
 #      minimumIdle: 1
-
+#
 #  cloud:
 #    nacos:
 #      discovery:
 #        server-addr: 127.0.0.1
 #  application:
 #    name: gulimall-product
-#
+#  jackson:
+#    date-format: yyyy-MM-dd HH:mm:ss
+
 #mybatis-plus:
 #  mapper-locations: classpath:/mapper/**/*.xml
 #  global-config:

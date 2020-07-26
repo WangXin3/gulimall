@@ -1,9 +1,9 @@
 spring:
   application:
-    name: gulimall-coupon
+    name: gulimall-ware
   cloud:
     nacos:
       config:
         server-addr: 127.0.0.1
-        namespace: a1ad731d-223b-4efa-b604-4e4c30ae6e3b
         file-extension: yml
+        namespace: 7e2f6848-e83c-4aa3-a874-470171dd20ae

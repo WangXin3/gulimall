@@ -1,5 +1,6 @@
 package com.wxx.gulimall.ware.service.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,10 +19,31 @@ public class PurchaseDetailServiceImpl extends ServiceImpl<PurchaseDetailDao, Pu
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
-        IPage<PurchaseDetailEntity> page = this.page(
-                new Query<PurchaseDetailEntity>().getPage(params),
-                new QueryWrapper<PurchaseDetailEntity>()
-        );
+        QueryWrapper<PurchaseDetailEntity> wrapper = new QueryWrapper<>();
+
+        /**
+         *    key: '华为',//检索关键字
+         *    status: 0,//状态
+         *    wareId: 1,//仓库id
+         */
+
+        String key = (String) params.get("key");
+        if (StringUtils.isNotBlank(key)) {
+            wrapper.and(w -> w.eq("purchase_id", key).or().eq("sku_id", key));
+        }
+
+
+        String status = (String) params.get("status");
+        if (StringUtils.isNotBlank(status)) {
+            wrapper.eq("status", status);
+        }
+
+        String wareId = (String) params.get("wareId");
+        if (StringUtils.isNotBlank(wareId)) {
+            wrapper.eq("ware_id", wareId);
+        }
+
+        IPage<PurchaseDetailEntity> page = this.page(new Query<PurchaseDetailEntity>().getPage(params), wrapper);
 
         return new PageUtils(page);
     }
