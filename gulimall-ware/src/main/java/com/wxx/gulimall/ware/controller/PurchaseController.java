@@ -1,14 +1,14 @@
 package com.wxx.gulimall.ware.controller;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import com.wxx.gulimall.ware.vo.MergeVO;
+import com.wxx.gulimall.ware.vo.PurchaseDoneVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.wxx.gulimall.ware.entity.PurchaseEntity;
 import com.wxx.gulimall.ware.service.PurchaseService;
@@ -29,6 +29,44 @@ import com.wxx.common.utils.R;
 public class PurchaseController {
     @Autowired
     private PurchaseService purchaseService;
+
+    @PostMapping("/done")
+    public R done(@RequestBody PurchaseDoneVO vo) {
+        purchaseService.done(vo);
+        return R.ok();
+    }
+
+    /**
+     * 领取采购单
+     * @param ids 采购单id
+     * @return
+     */
+    @PostMapping("/received")
+    public R received(@RequestBody List<Long> ids) {
+        purchaseService.received(ids);
+        return R.ok();
+    }
+
+    /**
+     * {
+     *   purchaseId: 1, //整单id
+     *   items:[1,2,3,4] //合并项集合
+     * }
+     * @return
+     */
+    @PostMapping("/merge")
+    public R merge(@RequestBody MergeVO mergeVO) {
+        purchaseService.mergePurchase(mergeVO);
+        return R.ok();
+    }
+
+
+    @RequestMapping("/unreceive/list")
+    public R unReceiveList(@RequestParam Map<String, Object> params){
+        PageUtils page = purchaseService.queryPageunReceivePurchase(params);
+
+        return R.ok().put("page", page);
+    }
 
     /**
      * 列表
@@ -59,6 +97,8 @@ public class PurchaseController {
     @RequestMapping("/save")
     // @RequiresPermissions("ware:purchase:save")
     public R save(@RequestBody PurchaseEntity purchase){
+        purchase.setCreateTime(new Date());
+        purchase.setUpdateTime(new Date());
 		purchaseService.save(purchase);
 
         return R.ok();
