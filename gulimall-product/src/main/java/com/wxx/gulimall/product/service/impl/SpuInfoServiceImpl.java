@@ -1,10 +1,13 @@
 package com.wxx.gulimall.product.service.impl;
 
+import com.wxx.common.dto.SkuHasStockVO;
 import com.wxx.common.dto.SkuReductionDTO;
 import com.wxx.common.dto.SpuBoundDTO;
+import com.wxx.common.dto.es.SkuEsModel;
 import com.wxx.common.utils.R;
 import com.wxx.gulimall.product.entity.*;
 import com.wxx.gulimall.product.feign.CouponFeignService;
+import com.wxx.gulimall.product.feign.WareFeignService;
 import com.wxx.gulimall.product.service.*;
 import com.wxx.gulimall.product.vo.*;
 import org.apache.commons.lang3.StringUtils;
@@ -13,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -55,6 +56,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     private CouponFeignService couponFeignService;
+
+    @Autowired
+    private BrandService brandService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private WareFeignService wareFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -224,6 +234,79 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         IPage<SpuInfoEntity> page = this.page(new Query<SpuInfoEntity>().getPage(params), wrapper);
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void up(Long spuId) {
+
+        // 1. 查询当前spuid对应的所有sku信息，品牌的名字
+        List<SkuInfoEntity> skus = skuInfoService.getSkusBySpuId(spuId);
+        List<Long> skuIds = skus.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
+
+        // TODO 4. 查询当前sku的所有可以用来被检索的规格属性
+        List<ProductAttrValueEntity> baseAttrs = productAttrValueService.baseAttrListForSpu(spuId);
+        List<Long> attrIds = baseAttrs.stream().map(attr -> attr.getAttrId()).collect(Collectors.toList());
+
+        List<Long> searchAttrId = attrService.selectSearchAttrIds(attrIds);
+        Set<Long> idSet = new HashSet<>(searchAttrId);
+
+        List<SkuEsModel.Attrs> collect = baseAttrs.stream()
+                .filter(b -> idSet.contains(b.getAttrId()))
+                .map(b -> {
+                    SkuEsModel.Attrs attr = new SkuEsModel.Attrs();
+                    BeanUtils.copyProperties(b, attr);
+
+                    return attr;
+                }).collect(Collectors.toList());
+
+
+        Map<Long, Boolean> skuHasStockMap = null;
+        try {
+            List<SkuHasStockVO> skuHasStockVOS = wareFeignService.getSkusHasStock(skuIds).getData();
+
+            skuHasStockMap = skuHasStockVOS.stream()
+                    .collect(Collectors.toMap(SkuHasStockVO::getSkuId, SkuHasStockVO::getHasStock));
+        } catch (Exception e) {
+            log.error("日志服务查询异常:原因{}", e);
+        }
+
+
+        // 2. 封装每个sku的信息
+        Map<Long, Boolean> finalSkuHasStockMap = skuHasStockMap;
+        List<SkuEsModel> upProducts = skus.stream().map(sku -> {
+            SkuEsModel esModel = new SkuEsModel();
+            BeanUtils.copyProperties(sku, esModel);
+            esModel.setSkuPrice(sku.getPrice());
+            esModel.setSkuImg(sku.getSkuDefaultImg());
+
+            // TODO 1. 发送远程调用, 查询库存系统是否有库存
+            if (finalSkuHasStockMap != null) {
+                esModel.setHasStock(finalSkuHasStockMap.get(sku.getSkuId()));
+            } else {
+                esModel.setHasStock(true);
+            }
+
+            // TODO 2. 热度评分, 默认0
+            esModel.setHotScore(0L);
+
+            // TODO 3. 查询品牌和分类的名字信息
+            BrandEntity brand = brandService.getById(esModel.getBrandId());
+            esModel.setBrandName(brand.getName());
+            esModel.setBrandImg(brand.getLogo());
+
+            CategoryEntity category = categoryService.getById(esModel.getCatelogId());
+            esModel.setCatelogName(category.getName());
+
+
+            esModel.setAttrs(collect);
+
+            return esModel;
+        }).collect(Collectors.toList());
+
+
+        // TODO 5. 将数据发送给es进行保存
+
+
     }
 
 

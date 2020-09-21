@@ -35,17 +35,19 @@ import com.wxx.gulimall.product.service.AttrService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
+
 
 @Service("attrService")
 public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements AttrService {
 
-    @Autowired
+    @Resource
     private AttrAttrgroupRelationDao attrAttrgroupRelationDao;
 
-    @Autowired
+    @Resource
     private AttrGroupDao attrGroupDao;
 
-    @Autowired
+    @Resource
     private CategoryDao categoryDao;
 
     @Autowired
@@ -256,6 +258,12 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         PageUtils pageUtils = new PageUtils(page);
 
         return pageUtils;
+    }
+
+    @Override
+    public List<Long> selectSearchAttrIds(List<Long> attrIds) {
+        List<AttrEntity> list = this.list(new QueryWrapper<AttrEntity>().in("attr_id", attrIds).eq("search_type", 1));
+        return list.stream().map(AttrEntity::getAttrId).collect(Collectors.toList());
     }
 
 
