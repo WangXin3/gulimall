@@ -1,5 +1,8 @@
 package com.wxx.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.wxx.common.constant.ProductConstant;
 import com.wxx.common.dto.SkuHasStockVO;
 import com.wxx.common.dto.SkuReductionDTO;
 import com.wxx.common.dto.SpuBoundDTO;
@@ -7,6 +10,7 @@ import com.wxx.common.dto.es.SkuEsModel;
 import com.wxx.common.utils.R;
 import com.wxx.gulimall.product.entity.*;
 import com.wxx.gulimall.product.feign.CouponFeignService;
+import com.wxx.gulimall.product.feign.SearchFeignService;
 import com.wxx.gulimall.product.feign.WareFeignService;
 import com.wxx.gulimall.product.service.*;
 import com.wxx.gulimall.product.vo.*;
@@ -65,6 +69,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     private WareFeignService wareFeignService;
+
+    @Autowired
+    private SearchFeignService searchFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -262,10 +269,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
         Map<Long, Boolean> skuHasStockMap = null;
         try {
-            List<SkuHasStockVO> skuHasStockVOS = wareFeignService.getSkusHasStock(skuIds).getData();
+            TypeReference<List<SkuHasStockVO>> typeReference = new TypeReference<List<SkuHasStockVO>>() {
+            };
 
-            skuHasStockMap = skuHasStockVOS.stream()
-                    .collect(Collectors.toMap(SkuHasStockVO::getSkuId, SkuHasStockVO::getHasStock));
+            List<SkuHasStockVO> skuHasStockVOS = wareFeignService.getSkusHasStock(skuIds).getData(typeReference);
+
+            if (!CollectionUtils.isEmpty(skuHasStockVOS)) {
+                skuHasStockMap = skuHasStockVOS.stream()
+                        .collect(Collectors.toMap(SkuHasStockVO::getSkuId, SkuHasStockVO::getHasStock));
+            }
         } catch (Exception e) {
             log.error("日志服务查询异常:原因{}", e);
         }
@@ -294,8 +306,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             esModel.setBrandName(brand.getName());
             esModel.setBrandImg(brand.getLogo());
 
-            CategoryEntity category = categoryService.getById(esModel.getCatelogId());
-            esModel.setCatelogName(category.getName());
+            CategoryEntity category = categoryService.getById(esModel.getCatalogId());
+            esModel.setCatalogName(category.getName());
 
 
             esModel.setAttrs(collect);
@@ -305,7 +317,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
 
         // TODO 5. 将数据发送给es进行保存
-
+        R r = searchFeignService.productStatusUp(upProducts);
+        if (r.getCode() == 0) {
+            // 远程调用成功
+            // TODO 6. 修改当前spu的状态为已上架
+            baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        } else {
+            // 远程调用失败
+            // TODO 7. 接口幂等性 重复上架
+        }
 
     }
 

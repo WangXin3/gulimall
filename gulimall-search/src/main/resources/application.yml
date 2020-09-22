@@ -10,3 +10,5 @@
 #  host:
 #  username: elastic
 #  password:
+#server:
+#  port: 12000

@@ -94,7 +94,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             Long count = baseMapper.getSkuStock(sku);
 
             vo.setSkuId(sku);
-            vo.setHasStock(count > 0);
+            vo.setHasStock(count == null ? false : count > 0);
 
             return vo;
         }).collect(Collectors.toList());
