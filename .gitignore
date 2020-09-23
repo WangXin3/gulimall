@@ -19,3 +19,5 @@ buildNumber.properties
 .idea
 **/*.iml
 **/target
+
+**/**/**/static

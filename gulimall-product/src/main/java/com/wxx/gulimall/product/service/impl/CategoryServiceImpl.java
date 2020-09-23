@@ -1,6 +1,7 @@
 package com.wxx.gulimall.product.service.impl;
 
 import com.wxx.gulimall.product.service.CategoryBrandRelationService;
+import com.wxx.gulimall.product.vo.Catalog2VO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import com.wxx.gulimall.product.dao.CategoryDao;
 import com.wxx.gulimall.product.entity.CategoryEntity;
 import com.wxx.gulimall.product.service.CategoryService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 
 @Service("categoryService")
@@ -82,6 +84,50 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
 
+    }
+
+    @Override
+    public List<CategoryEntity> getLevel1Categorys() {
+        return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
+    }
+
+    @Override
+    public Map<String, List<Catalog2VO>> getCatalogJson() {
+        // 1. 查询所有分类
+        List<CategoryEntity> category1s = this.getLevel1Categorys();
+
+        // 2.封装数据
+        Map<String, List<Catalog2VO>> map = category1s.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+            // 查询每一个1级分类的2级分类
+            List<CategoryEntity> categoryEntities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", v.getCatId()));
+
+            List<Catalog2VO> catalog2VOList = null;
+            if (!CollectionUtils.isEmpty(categoryEntities)) {
+                catalog2VOList = categoryEntities.stream().map(l2 -> {
+
+                    List<CategoryEntity> category3Entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", l2.getCatId()));
+
+                    List<Catalog2VO.Catalog3VO> catalog3VOList = null;
+
+                    if (!CollectionUtils.isEmpty(category3Entities)) {
+                        catalog3VOList = category3Entities.stream().map(l3 -> {
+                            Catalog2VO.Catalog3VO catalog3VO = new Catalog2VO.Catalog3VO(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
+                            return catalog3VO;
+                        }).collect(Collectors.toList());
+                    }
+
+
+                    Catalog2VO vo = new Catalog2VO(v.getCatId().toString(), catalog3VOList,
+                            l2.getCatId().toString(), l2.getName());
+
+                    return vo;
+                }).collect(Collectors.toList());
+            }
+
+            return catalog2VOList;
+        }));
+
+        return map;
     }
 
     private List<Long> findParentPath(Long groupId, List<Long> paths) {
