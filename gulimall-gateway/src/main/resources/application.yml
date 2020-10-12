@@ -40,6 +40,11 @@
 #            - Path=/api/**
 #          filters:
 #            - RewritePath=/api/(?<segment>/?.*), /renren-fast/$\{segment}
+#
+#        - id: gulimall_host_route
+#          uri: lb://gulimall-product
+#          predicates:
+#            - Host=**.gulimall.com
 
 
 #server:
