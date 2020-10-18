@@ -1,11 +1,16 @@
 package com.wxx.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.wxx.gulimall.product.service.CategoryBrandRelationService;
 import com.wxx.gulimall.product.vo.Catalog2VO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -19,6 +24,7 @@ import com.wxx.gulimall.product.entity.CategoryEntity;
 import com.wxx.gulimall.product.service.CategoryService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 
 @Service("categoryService")
@@ -27,6 +33,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Autowired
     private CategoryBrandRelationService categoryBrandRelationService;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -91,21 +99,24 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
     }
 
-    @Override
-    public Map<String, List<Catalog2VO>> getCatalogJson() {
-        // 1. 查询所有分类
-        List<CategoryEntity> category1s = this.getLevel1Categorys();
+    public Map<String, List<Catalog2VO>> getCatalogJsonFromDb() {
+        // 查询所有分类
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+
+
+        // 1. 查询所有1级分类
+        List<CategoryEntity> category1s = this.getParentCid(selectList, 0L);
 
         // 2.封装数据
         Map<String, List<Catalog2VO>> map = category1s.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
             // 查询每一个1级分类的2级分类
-            List<CategoryEntity> categoryEntities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", v.getCatId()));
+            List<CategoryEntity> categoryEntities = this.getParentCid(selectList, v.getCatId());
 
             List<Catalog2VO> catalog2VOList = null;
             if (!CollectionUtils.isEmpty(categoryEntities)) {
                 catalog2VOList = categoryEntities.stream().map(l2 -> {
 
-                    List<CategoryEntity> category3Entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", l2.getCatId()));
+                    List<CategoryEntity> category3Entities = this.getParentCid(selectList, l2.getCatId());
 
                     List<Catalog2VO.Catalog3VO> catalog3VOList = null;
 
@@ -128,6 +139,35 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         }));
 
         return map;
+    }
+
+    @Override
+    public Map<String, List<Catalog2VO>> getCatalogJson() {
+        Map<String, List<Catalog2VO>> map;
+
+        /**
+         * 1. 空结果缓存，解决缓存穿透
+         * 2. 在设置过期时间时 加上随机时长（1-5分钟），解决缓存雪崩
+         * 3. 给db请求加锁，避免缓存击穿
+         */
+
+        // 1.加入缓存逻辑
+        String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
+        if (StringUtils.isEmpty(catalogJSON)) {
+            // 2.缓存中没有, 查询数据库
+            map = getCatalogJsonFromDb();
+            // 3.并放入缓存
+            redisTemplate.opsForValue().set("catalogJSON", JSON.toJSONString(map), 1, TimeUnit.DAYS);
+        } else {
+            map = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catalog2VO>>>() {
+            });
+        }
+
+        return map;
+    }
+
+    private List<CategoryEntity> getParentCid(List<CategoryEntity> selectList, Long cid) {
+        return selectList.stream().filter(item -> item.getParentCid().equals(cid)).collect(Collectors.toList());
     }
 
     private List<Long> findParentPath(Long groupId, List<Long> paths) {
