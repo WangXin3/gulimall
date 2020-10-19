@@ -1,12 +1,12 @@
 package com.wxx.gulimall.product.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.wxx.gulimall.product.service.CategoryBrandRelationService;
 import com.wxx.gulimall.product.vo.Catalog2VO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -99,7 +99,62 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
     }
 
-    public Map<String, List<Catalog2VO>> getCatalogJsonFromDb() {
+    /**
+     * 本地锁
+     * @return
+     */
+    public Map<String, List<Catalog2VO>> getCatalogJsonFromDbWithLocalLock() {
+        // 加锁
+        // TODO 本地锁，在分布式情况下，想要锁住所有，必须使用分布式锁
+        synchronized (this) {
+            return getDataFromDB();
+        }
+    }
+
+    /**
+     * 分布式锁， 基于redis
+     * @return
+     */
+    public Map<String, List<Catalog2VO>> getCatalogJsonFromDbWithRedisLock() {
+        String uuid = UUID.randomUUID().toString();
+        // 加锁设置过期时间（原子性操作） 避免死锁
+        Boolean lock = redisTemplate.opsForValue().setIfAbsent("lock", uuid, 300, TimeUnit.SECONDS);
+        if (lock) {
+            // 加锁成功 做业务
+            Map<String, List<Catalog2VO>> dataFromDB = null;
+            try {
+                dataFromDB = getDataFromDB();
+            } finally {
+                // 删除锁 保证原子性操作，使用lua脚本
+                String script = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
+                // 删除成功返回1 失败返回0
+                Long delValue = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), Arrays.asList("lock"), uuid);
+            }
+
+
+            return dataFromDB;
+        } else {
+            // 加锁失败 重试 （自旋锁）
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return getCatalogJsonFromDbWithRedisLock();
+        }
+
+
+    }
+
+    private Map<String, List<Catalog2VO>> getDataFromDB() {
+        // 再去缓存中查询结果，如果没有再去查询db
+        String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
+        if (!StringUtils.isEmpty(catalogJSON)) {
+            return JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catalog2VO>>>() {
+            });
+        }
+
         // 查询所有分类
         List<CategoryEntity> selectList = baseMapper.selectList(null);
 
@@ -138,6 +193,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             return catalog2VOList;
         }));
 
+        // 3.并放入缓存
+        redisTemplate.opsForValue().set("catalogJSON", JSON.toJSONString(map), 1, TimeUnit.DAYS);
+
         return map;
     }
 
@@ -155,9 +213,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
         if (StringUtils.isEmpty(catalogJSON)) {
             // 2.缓存中没有, 查询数据库
-            map = getCatalogJsonFromDb();
-            // 3.并放入缓存
-            redisTemplate.opsForValue().set("catalogJSON", JSON.toJSONString(map), 1, TimeUnit.DAYS);
+            map = getCatalogJsonFromDbWithRedisLock();
         } else {
             map = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catalog2VO>>>() {
             });
