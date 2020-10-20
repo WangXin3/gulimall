@@ -3,10 +3,13 @@ package com.wxx.gulimall.product.web;
 import com.wxx.gulimall.product.entity.CategoryEntity;
 import com.wxx.gulimall.product.service.CategoryService;
 import com.wxx.gulimall.product.vo.Catalog2VO;
+import org.redisson.api.RCountDownLatch;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -38,4 +41,28 @@ public class IndexController {
         Map<String, List<Catalog2VO>> map = categoryService.getCatalogJson();
         return map;
     }
+
+    @Autowired
+    private RedissonClient redissonClient;
+
+    @GetMapping("/lockDoor")
+    @ResponseBody
+    public String lockDoor() throws InterruptedException {
+        RCountDownLatch door = redissonClient.getCountDownLatch("door");
+        door.trySetCount(3);
+        door.await();
+
+        return "锁门下班了！";
+    }
+
+
+    @GetMapping("/gogogo/{id}")
+    @ResponseBody
+    public String gogogo(@PathVariable("id") Long id) {
+        RCountDownLatch door = redissonClient.getCountDownLatch("door");
+        door.countDown();
+
+        return id + "走完了";
+    }
+
 }
