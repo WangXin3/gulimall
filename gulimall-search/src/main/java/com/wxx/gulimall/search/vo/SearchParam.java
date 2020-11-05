@@ -31,9 +31,9 @@ public class SearchParam {
     private String sort;
 
     /**
-     * 是否有货 0-有货 1-无货
+     * 是否有货 0-无货 1-有货
      */
-    private String hasStock;
+    private Integer hasStock = 1;
 
 
     /**
@@ -59,6 +59,6 @@ public class SearchParam {
     /**
      * 页码
      */
-    private Long pageNum;
+    private Integer pageNum = 1;
 
 }
