@@ -31,7 +31,7 @@ public class SearchResult {
     /**
      * 总页数
      */
-    private Integer totalPages;
+    private Long totalPages;
 
     /**
      * 当前查询到的结果，涉及到的所有品牌
