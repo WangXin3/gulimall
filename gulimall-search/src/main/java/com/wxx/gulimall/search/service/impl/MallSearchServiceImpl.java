@@ -22,6 +22,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -122,7 +123,9 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
 
         // 1.2.4 filter - hasStock 是否有库存
-        boolQuery.filter(QueryBuilders.termQuery("hasStock", searchParam.getHasStock() == 1));
+        if (searchParam.getHasStock() != null) {
+            boolQuery.filter(QueryBuilders.termQuery("hasStock", searchParam.getHasStock() == 1));
+        }
 
         // 1.2.5 filter - skuPrice 价格
         if (StringUtils.isNotBlank(searchParam.getSkuPrice())) {
@@ -218,13 +221,34 @@ public class MallSearchServiceImpl implements MallSearchService {
      */
     private SearchResult builderSearchResult(SearchParam param, SearchResponse searchResponse) {
         SearchResult result = new SearchResult();
+        // 商品集合
+        List<SkuEsModel> products = new ArrayList<>();
+
+        // 当前查询到的结果，涉及到的所有品牌
+        List<SearchResult.BrandVO> brands = new ArrayList<>();
+
+        // 当前查询到的结果，涉及到的所有分类
+        List<SearchResult.CatalogVO> catalogs = new ArrayList<>();
+
+        // 当前查询到的结果，涉及到的所有属性
+        List<SearchResult.AttrVO> attrs = new ArrayList<>();
+
+        result.setProducts(products);
+        result.setBrands(brands);
+        result.setCatalogs(catalogs);
+        result.setAttrs(attrs);
+
         SearchHit[] hits = searchResponse.getHits().getHits();
         for (SearchHit hit : hits) {
             String sourceAsString = hit.getSourceAsString();
             SkuEsModel model = JSONObject.parseObject(sourceAsString, SkuEsModel.class);
             // 高亮
-            String highlight = hit.getHighlightFields().get("highlight").fragments()[0].toString();
-            model.setSkuTitle(highlight);
+            HighlightField highlightField = hit.getHighlightFields().get("skuTitle");
+            if (highlightField != null) {
+                String highlight = highlightField.fragments()[0].toString();
+                model.setSkuTitle(highlight);
+            }
+
             result.getProducts().add(model);
         }
 
@@ -291,6 +315,8 @@ public class MallSearchServiceImpl implements MallSearchService {
                 attrValue.add(attrValueAggBucket.getKeyAsString());
             }
             attrVO.setAttrValue(attrValue);
+
+            result.getAttrs().add(attrVO);
         }
 
         return result;

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * @author 她爱微笑
@@ -20,7 +19,7 @@ public class SearchController {
     private MallSearchService mallSearchService;
 
     @GetMapping("/list.html")
-    public String listPage(@RequestBody SearchParam searchParam, Model model) {
+    public String listPage(SearchParam searchParam, Model model) {
 
         // 1.根据传递来的页面的查询参数，去es中检索
         SearchResult result = mallSearchService.search(searchParam);

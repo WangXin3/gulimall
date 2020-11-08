@@ -33,7 +33,7 @@ public class SearchParam {
     /**
      * 是否有货 0-无货 1-有货
      */
-    private Integer hasStock = 1;
+    private Integer hasStock;
 
 
     /**
