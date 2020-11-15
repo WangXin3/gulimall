@@ -1,8 +1,17 @@
 package com.wxx.gulimall.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wxx.common.utils.PageUtils;
+import com.wxx.common.utils.Query;
+import com.wxx.gulimall.product.dao.AttrGroupDao;
 import com.wxx.gulimall.product.entity.AttrEntity;
+import com.wxx.gulimall.product.entity.AttrGroupEntity;
+import com.wxx.gulimall.product.service.AttrGroupService;
 import com.wxx.gulimall.product.service.AttrService;
 import com.wxx.gulimall.product.vo.AttrGroupWithAttrsVO;
+import com.wxx.gulimall.product.vo.SpuItemAttrGroupVO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,16 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.wxx.common.utils.PageUtils;
-import com.wxx.common.utils.Query;
-
-import com.wxx.gulimall.product.dao.AttrGroupDao;
-import com.wxx.gulimall.product.entity.AttrGroupEntity;
-import com.wxx.gulimall.product.service.AttrGroupService;
 
 
 @Service("attrGroupService")
@@ -76,6 +75,15 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
 
         return collect;
+    }
+
+    @Override
+    public List<SpuItemAttrGroupVO> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId) {
+        // 1.出当前Spu对应的所有属性的分组信息 以及当前分组下所有属性对应的值
+        // 1.1 查询所有分组
+        AttrGroupDao baseMapper = this.getBaseMapper();
+
+        return baseMapper.getAttrGroupWithAttrsBySpuId(spuId, catalogId);
     }
 
 }

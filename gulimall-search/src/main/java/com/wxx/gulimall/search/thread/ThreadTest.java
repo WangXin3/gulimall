@@ -296,12 +296,12 @@ public class ThreadTest {
 
 //             只要异步线程队列有一个任务率先完成就返回，这个特性可以用来获取最快的那个线程结果。
 //        CompletableFuture<Object> anyOf = CompletableFuture.anyOf(future01, future02, future03);
-//        // 获取若干个任务中最快完成的任务结果
+//        // 获取若干个任务中最快完成的任务结果  .join会抛出未经检查的异常，不会强制开发者处理异常 .get会抛出检查异常，需要开发者处理
 //        Object o = anyOf.get();
 
         // 串联起若干个线程任务
 //        CompletableFuture<Void> all = CompletableFuture.allOf(future01, future02, future03);
-//        // 等待所有结果完成
+//        // 等待所有结果完成  .join会抛出未经检查的异常，不会强制开发者处理异常 .get会抛出检查异常，需要开发者处理
 //        all.join();
 
 

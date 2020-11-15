@@ -29,7 +29,13 @@ public class SearchController {
     }
 
     @GetMapping("/search.html")
-    public String search() {
+    public String search(SearchParam searchParam, Model model) {
+
+        // 1.根据传递来的页面的查询参数，去es中检索
+        SearchResult result = mallSearchService.search(searchParam);
+
+        model.addAttribute("result", result);
+
         return "list";
     }
 }
