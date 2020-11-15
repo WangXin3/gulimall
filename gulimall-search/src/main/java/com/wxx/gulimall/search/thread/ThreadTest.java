@@ -142,16 +142,25 @@ public class ThreadTest {
     public static ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public static void main1111(String[] args) throws ExecutionException, InterruptedException {
-        System.out.println("main....start.....");
-
-        // TODO 异步起线程执行业务 无返回值
+//        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+//                10,
+//                50,
+//                60,
+//                TimeUnit.SECONDS,
+//                new LinkedBlockingQueue<>(100000),
+//                Executors.defaultThreadFactory(),
+//                new ThreadPoolExecutor.AbortPolicy());
+//
+//        System.out.println("main....start.....");
+//
+//        // TODO 异步起线程执行业务 无返回值
 //        CompletableFuture<Void> voidCompletableFuture = CompletableFuture.runAsync(() -> {
 //            System.out.println("当前线程：" + Thread.currentThread().getId());
 //            int i = 10 / 2;
 //            System.out.println("运行结果：" + i);
 //        }, executorService);
-
-        // TODO 异步起线程执行业务 有返回值
+//
+//        // TODO 异步起线程执行业务 有返回值
 //        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
 //            System.out.println("当前线程：" + Thread.currentThread().getId());
 //            int i = 10 / 0;
@@ -164,9 +173,9 @@ public class ThreadTest {
 ////                 返回一个自定义的值，和上文返回值无关。
 //            return 10;
 //        });
-
-
-        //方法执行完成后的处理
+//
+//
+//        //方法执行完成后的处理
 //        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
 //            System.out.println("当前线程：" + Thread.currentThread().getId());
 //            int i = 10 / 0;
@@ -187,7 +196,7 @@ public class ThreadTest {
          * 线程串行操作。
          */
         // 两个任务串行执行，第二个线程不用第一个线程的返回值，并且第二个线程无返回值。
-//        CompletableFuture.supplyAsync(() -> {
+//        CompletableFuture<Void> future1 = CompletableFuture.supplyAsync(() -> {
 //            System.out.println("当前线程：" + Thread.currentThread().getId());
 //            int i = 10 / 4;
 //            System.out.println("运行结果：" + i);
@@ -195,9 +204,9 @@ public class ThreadTest {
 //        }, executorService).thenRunAsync(() -> {
 //            System.out.println("任务2启动了");
 //        }, executorService);
-
-        // 两个任务串行执行，第二个线程用第一个线程的返回值，并且第二个线程无返回值。
-//        CompletableFuture.supplyAsync(() -> {
+//
+////         两个任务串行执行，第二个线程用第一个线程的返回值，并且第二个线程无返回值。
+//        CompletableFuture<Void> future2 = CompletableFuture.supplyAsync(() -> {
 //            System.out.println("当前线程：" + Thread.currentThread().getId());
 //            int i = 10 / 4;
 //            System.out.println("运行结果：" + i);
@@ -205,9 +214,9 @@ public class ThreadTest {
 //        }, executorService).thenAcceptAsync(res -> {
 //            System.out.println("任务2启动了" + res);
 //        }, executorService);
-
-        // 两个任务串行执行，第二个线程要使用第一个线程的返回值，并且返回第二个线程的返回值。
-//        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+//
+////         两个任务串行执行，第二个线程要使用第一个线程的返回值，并且返回第二个线程的返回值。
+//        CompletableFuture<String> future3 = CompletableFuture.supplyAsync(() -> {
 //            System.out.println("当前线程：" + Thread.currentThread().getId());
 //            int i = 10 / 4;
 //            System.out.println("运行结果：" + i);
@@ -216,14 +225,14 @@ public class ThreadTest {
 //            System.out.println("任务2启动了" + res);
 //            return "Hello" + res;
 //        }, executorService);
-//        String s = future.get();
+//        String s = future3.get();
 //        System.out.println(s);
 
 
 
         /**
          * 两个任务并行，且都完成的情况下，才执行任务3
-         */
+//         */
 //        CompletableFuture<Object> future01 = CompletableFuture.supplyAsync(() -> {
 //            System.out.println("任务1线程：" + Thread.currentThread().getId());
 //            int i = 10 / 4;
@@ -246,63 +255,58 @@ public class ThreadTest {
 //            }
 //            return "Hello";
 //        }, executorService);
-
-        // 两个任务都完成，在不使用两个任务返回值的情况下执行任务3，并且不返回值
-//        future01.runAfterBothAsync(future02,()->{
-//            System.out.println("任务3开始");
-//        },executorService);
-
-        // 两个任务都完成，任务3需要任务1和任务2的结果，并且不返回值
-//        future01.thenAcceptBothAsync(future02, (f1,f2)->{
-//            System.out.println("任务3开始，之前的结果" + f1 + "-->" + f2);
-//        },executorService);
-
-        // 两个任务都完成，任务3需要任务1和任务2的结果，并且返回值
-//        CompletableFuture<String> future = future01.thenCombineAsync(future02, (f1, f2) -> {
-//            return f1 + ":" + f2 + "->haha";
-//        }, executorService)
-
+//
+////         两个任务都完成，在不使用两个任务返回值的情况下执行任务3，并且不返回值
+//        CompletableFuture<Void> future1 = future01.runAfterBothAsync(future02,
+//                () -> System.out.println("任务3开始"), executorService);
+//
+////         两个任务都完成，任务3需要任务1和任务2的结果，并且不返回值
+//        CompletableFuture<Void> future2 = future01.thenAcceptBothAsync(future02,
+//                (f1, f2) -> System.out.println("任务3开始，之前的结果" + f1 + "-->" + f2), executorService);
+//
+////         两个任务都完成，任务3需要任务1和任务2的结果，并且返回值
+//        CompletableFuture<String> future3 = future01.thenCombineAsync(future02,
+//                (f1, f2) -> f1 + ":" + f2 + "->haha", executorService);
+//        String str = future3.get();
+//        System.out.println(str);
         /**
          * 两个任务并行，且只要有一个完成，我们就执行任务3
          */
         // 不使用future01或future02线程的结果，执行任务3，并且不返回值
-//        future01.runAfterEitherAsync(future02,()->{
-//            System.out.println("任务3开始，之前的结果");
-//        }, executorService);
-
-        // 使用future01或future02线程的结果，执行任务3，并且不返回值
-//        future01.acceptEitherAsync(future02, (res)->{
-//            System.out.println("任务3开始，之前的结果" + res);
-//        },executorService);
-
-        // 使用future01或future02线程的结果，执行任务3，并且返回值
-//        CompletableFuture<String> future = future01.applyToEitherAsync(future02, (res) -> {
+//        future01.runAfterEitherAsync(future02,()-> System.out.println("任务3开始，之前的结果"), executorService);
+//
+////         使用future01或future02线程的结果，执行任务3，并且不返回值
+//        future01.acceptEitherAsync(future02, (res)-> System.out.println("任务3开始，之前的结果" + res),executorService);
+//
+////         使用future01或future02线程的结果，执行任务3，并且返回值
+//        CompletableFuture<Object> future = future01.applyToEitherAsync(future02, (res) -> {
 //            System.out.println("任务3开始，之前的结果" + res);
 //            return res.toString() + "->哈哈";
 //        }, executorService);
 
 
-//        CompletableFuture<String> future01 = CompletableFuture.supplyAsync(() -> "任务1", executorService);
-//        CompletableFuture<String> future02 = CompletableFuture.supplyAsync(() -> "任务2", executorService);
-//        CompletableFuture<String> future03 = CompletableFuture.supplyAsync(() -> {
-//
-//            try {
-//                Thread.sleep(3000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            return "任务3";
-//        }, executorService);
+        CompletableFuture<String> future01 = CompletableFuture.supplyAsync(() -> "任务1", executorService);
+        CompletableFuture<String> future02 = CompletableFuture.supplyAsync(() -> "任务2", executorService);
+        CompletableFuture<String> future03 = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "任务3";
+        }, executorService);
 
-//             只要异步线程队列有一个任务率先完成就返回，这个特性可以用来获取最快的那个线程结果。
-//        CompletableFuture<Object> anyOf = CompletableFuture.anyOf(future01, future02, future03);
-//        // 获取若干个任务中最快完成的任务结果  .join会抛出未经检查的异常，不会强制开发者处理异常 .get会抛出检查异常，需要开发者处理
-//        Object o = anyOf.get();
+        // 只要异步线程队列有一个任务率先完成就返回，这个特性可以用来获取最快的那个线程结果。
+        CompletableFuture<Object> anyOf = CompletableFuture.anyOf(future01, future02, future03);
+        // 获取若干个任务中最快完成的任务结果  .join会抛出未经检查的异常，不会强制开发者处理异常 .get会抛出检查异常，需要开发者处理
+        Object o1 = anyOf.get();
+        Object o2 = anyOf.join();
 
         // 串联起若干个线程任务
-//        CompletableFuture<Void> all = CompletableFuture.allOf(future01, future02, future03);
-//        // 等待所有结果完成  .join会抛出未经检查的异常，不会强制开发者处理异常 .get会抛出检查异常，需要开发者处理
-//        all.join();
+        CompletableFuture<Void> all = CompletableFuture.allOf(future01, future02, future03);
+        // 等待所有结果完成  .join会抛出未经检查的异常，不会强制开发者处理异常 .get会抛出检查异常，需要开发者处理
+        all.join();
+        all.get();
 
 
 
