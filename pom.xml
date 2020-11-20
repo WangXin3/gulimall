@@ -25,6 +25,7 @@
         <module>renren-fast</module>
         <module>renren-generator</module>
         <module>gulimall-search</module>
+        <module>gulimall-auth-server</module>
     </modules>
 
     <build>
