@@ -7,3 +7,12 @@
 #        server-addr: 127.0.0.1:8848
 #  thymeleaf:
 #    cache: false
+#  redis:
+#    host:
+#    password:
+#    port:
+
+#oAuth2:
+#  weibo:
+#    clientId:
+#    clientSecret:

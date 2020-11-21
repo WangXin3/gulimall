@@ -1,20 +1,22 @@
 package com.wxx.gulimall.member.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import com.wxx.gulimall.member.feign.CouponFeignService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.wxx.gulimall.member.entity.MemberEntity;
-import com.wxx.gulimall.member.service.MemberService;
+import com.alibaba.fastjson.JSONObject;
+import com.wxx.common.exception.BizCodeEnum;
 import com.wxx.common.utils.PageUtils;
 import com.wxx.common.utils.R;
+import com.wxx.gulimall.member.entity.MemberEntity;
+import com.wxx.gulimall.member.exception.PhoneExistException;
+import com.wxx.gulimall.member.exception.UsernameExistException;
+import com.wxx.gulimall.member.feign.CouponFeignService;
+import com.wxx.gulimall.member.service.MemberService;
+import com.wxx.gulimall.member.vo.MemberLoginVO;
+import com.wxx.gulimall.member.vo.MemberRegistVO;
+import com.wxx.gulimall.member.vo.SocialUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -43,6 +45,36 @@ public class MemberController {
 
         return R.ok().put("member", memberEntity).put("coupons", memberCoupons.get("coupons"));
     }
+
+    @PostMapping("/regist")
+    public R regist(@RequestBody MemberRegistVO vo) {
+
+        try {
+            memberService.regist(vo);
+        } catch (PhoneExistException e) {
+            return R.error(BizCodeEnum.PHONE_EXIST_EXCEPTION.getCode(), BizCodeEnum.PHONE_EXIST_EXCEPTION.getMsg());
+        } catch (UsernameExistException e) {
+            return R.error(BizCodeEnum.USERNAME_EXIST_EXCEPTION.getCode(), BizCodeEnum.USERNAME_EXIST_EXCEPTION.getMsg());
+        }
+        return R.ok();
+    }
+
+    @PostMapping("/login")
+    public R login(@RequestBody MemberLoginVO vo) {
+        MemberEntity entity = memberService.login(vo);
+        if (entity == null) {
+            return R.error(BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(),
+                    BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getMsg());
+        }
+        return R.ok(JSONObject.toJSONString(entity));
+    }
+
+    @PostMapping("/oauth/login")
+    public R oauthLogin(@RequestBody SocialUser socialUser) {
+        MemberEntity entity = memberService.login(socialUser);
+        return R.ok().setData(entity);
+    }
+
     /**
      * 列表
      */

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <html>
 	<head>
 		<meta charset="utf-8" />
@@ -57,27 +58,30 @@
 						<div></div>
 						请输入账户名和密码
 					</div>
-					<ul>
-						<li class="top_1">
-							<img src="/static/login/JD_img/user_03.png" class="err_img1" />
-							<input type="text" placeholder=" 邮箱/用户名/已验证手机" class="user" />
-						</li>
-						<li>
-							<img src="/static/login/JD_img/user_06.png" class="err_img2" />
-							<input type="password" placeholder=" 密码" class="password" />
-						</li>
-						<li class="bri">
-							<a href="/static/login/">忘记密码</a>
-						</li>
-						<li class="ent"><button class="btn2"><a class="a">登 &nbsp; &nbsp;录</a></button></li>
-					</ul>
+					<form action="/login" method="post">
+						<div style="color: red" th:text="${errors != null ? (#maps.containsKey(errors, 'msg') ? errors.msg : '') : ''}"></div>
+						<ul>
+							<li class="top_1">
+								<img src="/static/login/JD_img/user_03.png" class="err_img1" />
+								<input type="text" name="loginAccount" placeholder=" 邮箱/用户名/已验证手机" class="user" />
+							</li>
+							<li>
+								<img src="/static/login/JD_img/user_06.png" class="err_img2" />
+								<input type="password" name="password" placeholder=" 密码" class="password" />
+							</li>
+							<li class="bri">
+								<a href="/static/login/">忘记密码</a>
+							</li>
+							<li class="ent"><button class="btn2" type="submit">登 &nbsp; &nbsp;录</button></li>
+						</ul>
+					</form>
 				</div>
 				<div class="si_out">
 					<ul>
 						<li>
-							<a href="/static/login/#">
-								<img src="/static/login/JD_img/qq.png" />
-								<span>QQ</span>
+							<a href="https://api.weibo.com/oauth2/authorize?client_id=4003908762&response_type=code&redirect_uri=http://auth.gulimall.com/oauth2/weibo/success">
+								<img src="/static/login/JD_img/weibo.png" style="width: 50px; height: 18px" />
+								<span>微博</span>
 							</a>
 						</li>
 						<li class="f4"> | </li>
@@ -149,32 +153,32 @@
 		var err_img1 = document.getElementsByClassName('err_img1')[0];
 		var err_img2 = document.getElementsByClassName('err_img2')[0];
 
-		btn2.onclick = function() {
-			if (user.value == '' || pass.value == '') {
-				err.style.display = 'block';
-				user.style.border = '1px solid red';
-				pass.style.border = '1px solid red';
-				err_img1.src = 'JD_img/img11.png';
-				err_img2.src = 'JD_img/img22.png';
-			} else {
-				var a = document.getElementsByClassName("a")[0].href = "http://www.baidu.com";
-			}
-			user.onfocus = function() {
-				err_img1.src = 'JD_img/grow1.png';
-				user.style.border = '1px solid #999';
-			}
-			pass.onfocus = function() {
-				err_img2.src = 'JD_img/grow2.png';
-				pass.style.border = '1px solid #999';
-			}
-			user.onblur = function() {
-				err_img1.src = 'JD_img/img11.png';
-				user.style.border = '1px solid red';
-			}
-			pass.onblur = function() {
-				err_img2.src = 'JD_img/img22.png';
-				pass.style.border = '1px solid red';
-			}
-		}
+		// btn2.onclick = function() {
+		// 	if (user.value == '' || pass.value == '') {
+		// 		err.style.display = 'block';
+		// 		user.style.border = '1px solid red';
+		// 		pass.style.border = '1px solid red';
+		// 		err_img1.src = 'JD_img/img11.png';
+		// 		err_img2.src = 'JD_img/img22.png';
+		// 	} else {
+		// 		var a = document.getElementsByClassName("a")[0].href = "http://www.baidu.com";
+		// 	}
+		// 	user.onfocus = function() {
+		// 		err_img1.src = 'JD_img/grow1.png';
+		// 		user.style.border = '1px solid #999';
+		// 	}
+		// 	pass.onfocus = function() {
+		// 		err_img2.src = 'JD_img/grow2.png';
+		// 		pass.style.border = '1px solid #999';
+		// 	}
+		// 	user.onblur = function() {
+		// 		err_img1.src = 'JD_img/img11.png';
+		// 		user.style.border = '1px solid red';
+		// 	}
+		// 	pass.onblur = function() {
+		// 		err_img2.src = 'JD_img/img22.png';
+		// 		pass.style.border = '1px solid red';
+		// 	}
+		// }
 	</script>
 </html>

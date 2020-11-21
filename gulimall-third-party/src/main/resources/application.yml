@@ -14,3 +14,10 @@
 
 #server:
 #  port: 30000
+
+#aliyuncs:
+#  sms:
+#    signName:
+#    templateCode:
+#    accessKeyId:
+#    accessSecret:

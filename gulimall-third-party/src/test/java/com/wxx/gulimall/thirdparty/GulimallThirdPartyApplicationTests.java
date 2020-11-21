@@ -1,6 +1,7 @@
 package com.wxx.gulimall.thirdparty;
 
 import com.aliyun.oss.OSSClient;
+import com.wxx.gulimall.thirdparty.component.SmsComponent;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,8 +16,12 @@ class GulimallThirdPartyApplicationTests {
     @Autowired
     OSSClient ossClient;
 
+    @Autowired
+    SmsComponent smsComponent;
+
     @Test
     void contextLoads() {
+        smsComponent.send("", "111111");
     }
 
 
