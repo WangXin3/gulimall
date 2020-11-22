@@ -34,6 +34,15 @@ public class R extends HashMap<String, Object> {
 		return this;
 	}
 
+	/**
+	 * @param key 获取指定key的名字
+	 */
+	public <T> T getData(String key, TypeReference<T> typeReference){
+		// get("data") 默认是map类型 所以再由map转成string再转json
+		Object data = get(key);
+		return JSON.parseObject(JSON.toJSONString(data), typeReference);
+	}
+
 	public <T> T getData(TypeReference<T> typeReference) {
 		Object data = get("data");
 		String s = JSONObject.toJSONString(data);

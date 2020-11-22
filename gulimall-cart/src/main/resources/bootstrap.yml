@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: gulimall-cart
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1
+        namespace: 5a3d7a2b-7e1d-47e5-bcc0-92969d8b2fa8
+        file-extension: yml

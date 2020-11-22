@@ -1,0 +1,20 @@
+#server:
+#  port: 30000
+#spring:
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 127.0.0.1
+#  thymeleaf:
+#    cache: false
+#  redis:
+#    host:
+#    password:
+#  session:
+#    store-type: redis
+#
+#gulimall:
+#  thread:
+#    core-size: 10
+#    max-size: 50
+#    keep-alive-time: 10

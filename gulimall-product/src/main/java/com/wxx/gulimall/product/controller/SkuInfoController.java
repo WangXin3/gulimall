@@ -1,19 +1,14 @@
 package com.wxx.gulimall.product.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.wxx.gulimall.product.entity.SkuInfoEntity;
-import com.wxx.gulimall.product.service.SkuInfoService;
 import com.wxx.common.utils.PageUtils;
 import com.wxx.common.utils.R;
+import com.wxx.gulimall.product.entity.SkuInfoEntity;
+import com.wxx.gulimall.product.service.SkuInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -29,6 +24,13 @@ import com.wxx.common.utils.R;
 public class SkuInfoController {
     @Autowired
     private SkuInfoService skuInfoService;
+
+    @GetMapping("/{skuId}/price")
+    public R getPrice(@PathVariable("skuId") Long skuId){
+
+        SkuInfoEntity byId = skuInfoService.getById(skuId);
+        return R.ok().setData(byId.getPrice().toString());
+    }
 
     /**
      * 列表

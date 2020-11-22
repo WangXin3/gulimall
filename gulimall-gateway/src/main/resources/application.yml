@@ -55,6 +55,11 @@
 #          uri: lb://gulimall-auth-server
 #          predicates:
 #            - Host=auth.gulimall.com
+#
+#        - id: gulimall-cart
+#          uri: lb://gulimall-cart
+#          predicates:
+#            - Host=cart.gulimall.com
 
 
 #server:
