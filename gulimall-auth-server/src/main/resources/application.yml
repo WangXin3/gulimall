@@ -11,7 +11,9 @@
 #    host:
 #    password:
 #    port:
-
+#  session:
+#    store-type: redis
+#    timeout: 30m
 #oAuth2:
 #  weibo:
 #    clientId:

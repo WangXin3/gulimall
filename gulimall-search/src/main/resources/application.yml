@@ -7,6 +7,11 @@
 #    name: gulimall-search
 #  thymeleaf:
 #    cache: false
+#  session:
+#    store-type: redis
+#  redis:
+#    host:
+#    password:
 #
 #elasticsearch:
 #  host:

@@ -1,8 +1,9 @@
-package com.wxx.gulimall.auth.vo;
+package com.wxx.common.vo;
 
 import lombok.Data;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Date;
  */
 @Data
 @ToString
-public class MemberRespVO {
+public class MemberRespVO implements Serializable {
 
     /**
      * id

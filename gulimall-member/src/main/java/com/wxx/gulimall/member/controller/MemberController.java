@@ -1,6 +1,5 @@
 package com.wxx.gulimall.member.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.wxx.common.exception.BizCodeEnum;
 import com.wxx.common.utils.PageUtils;
 import com.wxx.common.utils.R;
@@ -66,7 +65,7 @@ public class MemberController {
             return R.error(BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(),
                     BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getMsg());
         }
-        return R.ok(JSONObject.toJSONString(entity));
+        return R.ok().setData(entity);
     }
 
     @PostMapping("/oauth/login")

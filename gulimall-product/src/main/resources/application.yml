@@ -26,6 +26,8 @@
 #    type: redis
 #    redis:
 #      time-to-live: 3600000 # 毫秒
+#  session:
+#    store-type: redis
 
 
 #mybatis-plus:

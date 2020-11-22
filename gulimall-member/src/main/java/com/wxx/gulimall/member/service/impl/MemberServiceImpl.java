@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 @Service("memberService")
@@ -54,6 +55,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
         entity.setUsername(vo.getUsername());
         entity.setMobile(vo.getPhone());
+        entity.setNickname("谷粒用户" + UUID.randomUUID().toString().substring(0, 5));
 
         MemberLevelEntity memberLevelEntity = memberLevelDao.getDefalutLevel();
         entity.setLevelId(memberLevelEntity.getId());
