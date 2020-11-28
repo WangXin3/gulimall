@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: gulimall-order
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1
+        namespace: 83a482a5-acf4-471a-a345-b2ac8053d9c8
+        file-extension: yml
